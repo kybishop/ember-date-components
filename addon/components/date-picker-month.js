@@ -43,6 +43,18 @@ export default Ember.Component.extend({
   month: null,
 
   /**
+   * An optional function that returns `true` if a day should be disabled.
+   * Dates that return `true` from this function will not be selectable.
+   *
+   * @attribute disableDayFn
+   * @param {Date} the Date to check
+   * @type {function}
+   * @optional
+   * @public
+   */
+  disableDayFn: null,
+
+  /**
    * An optional minimum date.
    * No dates before this date will be selectable.
    *
@@ -258,13 +270,15 @@ export default Ember.Component.extend({
   _dayIsDisabled(day) {
     let {
       _minDate,
-      _maxDate
-    } = getProperties(this, '_minDate', '_maxDate');
+      _maxDate,
+      disableDayFn
+    } = getProperties(this, '_minDate', '_maxDate', 'disableDayFn');
 
-    if (_minDate && _minDate.valueOf() > day.valueOf()) {
-      return true;
-    }
-    return _maxDate && _maxDate.valueOf() < day.valueOf();
+    return (
+      (_minDate && _minDate.valueOf() > day.valueOf()) ||
+      (_maxDate && _maxDate.valueOf() < day.valueOf()) ||
+      (disableDayFn && disableDayFn(day.valueOf()))
+    );
   },
 
   /**
